@@ -319,6 +319,9 @@ jobs:
           else
             patch -p1 --fuzz=3 < 50_add_susfs_in_gki-${{ inputs.android_version }}-${{ inputs.kernel_version }}.patch || true
           fi
+
+          cp ../../../../wifi_fix.patch /
+          patch -p1 < wifi_fix.patch
   
       - name: 应用新的HOOKS补丁
         run: |

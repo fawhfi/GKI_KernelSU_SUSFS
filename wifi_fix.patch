@@ -1,0 +1,15 @@
+--- /drivers/base/firmware_loader/main.c	2025-09-17 17:54:47.479193353 +0800
++++ /drivers/base/firmware_loader/new_main.c	2025-09-17 18:49:03.948977784 +0800
+@@ -802,9 +802,9 @@
+ {
+ 	size_t name_len = strlen(name);
+ 
+-	return strcmp(name, "..") == 0 || strncmp(name, "../", 3) == 0 ||
+-	       strstr(name, "/../") != NULL ||
+-	       (name_len >= 3 && strcmp(name+name_len-3, "/..") == 0);
++        pr_info("HelloWorld", name_len);
++  
++	return false;
+ }
+ 
+ /* called from request_firmware() and request_firmware_work_func() */

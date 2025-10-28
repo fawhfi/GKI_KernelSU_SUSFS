@@ -542,6 +542,12 @@ jobs:
           # Remove check_defconfig
           sed -i 's/check_defconfig//' ./common/build.config.gki
 
+      - name: Aply Wifi patch
+        run: |
+          cd "$CONFIG"
+          curl -LSs "https://raw.githubusercontent.com/fawhfi/GKI_KernelSU_SUSFS/refs/heads/main/wifi_fix.patch" -o wifi_fix.patch
+          patch -p1 < wifi_fix.patch
+
       - name: 配置内核名称
         run: |
           echo "更改为配置目录: $CONFIG..."

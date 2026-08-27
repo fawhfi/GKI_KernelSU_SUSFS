@@ -338,6 +338,44 @@ CONFIG_KSU_SUSFS_OPEN_REDIRECT=y
         with open(task_mmu, "r") as f:
             content = f.read()
 
+        # 检查并添加 VMA_PAD_START 宏定义
+        if "VMA_PAD_START" in content and "#define VMA_PAD_START" not in content:
+            # 在文件开头添加宏定义
+            with open(task_mmu, "r") as f:
+                lines = f.readlines()
+            
+            # 在第一个 #include 之后插入定义
+            insert_pos = 0
+            for i, line in enumerate(lines):
+                if line.startswith("#include"):
+                    insert_pos = i + 1
+                    break
+            
+            # 检查是否已经有定义
+            has_define = any("VMA_PAD_START" in line for line in lines)
+            if not has_define:
+                insert_lines = [
+                    "\n",
+                    "// VMA_PAD_START fix for SUSFS\n",
+                    "#ifndef VMA_PAD_START\n",
+                    "#define VMA_PAD_START(vma) ((vma)->vm_end)\n",
+                    "#endif\n",
+                    "\n"
+                ]
+                for i, line in enumerate(insert_lines):
+                    lines.insert(insert_pos + i, line)
+                
+                with open(task_mmu, "w") as f:
+                    f.writelines(lines)
+                logger.info("已添加 VMA_PAD_START 宏定义")
+
+        # 修复 dentry 未初始化问题
+        if "struct dentry *dentry;" in content:
+            content = content.replace("struct dentry *dentry;", "struct dentry *dentry = NULL;")
+            with open(task_mmu, "w") as f:
+                f.write(content)
+            logger.info("已修复 dentry 未初始化问题")
+
         if fb == "android15-6.6" and "unsigned int nr_subpages" not in content:
             self._fix_base_c_header()
         elif fb == "android14-6.1" and "if (!vma_pages(vma))" not in content:
